@@ -1,0 +1,184 @@
+build_info = {
+  "version": "1.0.0-5-g8809108-dirty",
+  "branch": "main",
+  "dimensions": "1",
+  "precision": "DOUBLE",
+  "build_type": "production",
+  "system": "greatlakes.gnu",
+  "build_tool": "make",
+  "build_flags": {
+    "FPP"  :"mpicc -C -E -x assembler-with-cpp -nostdinc -D_OPENMP -DHDF5",
+    "FPPF" :"-DP_X_DIM=1 -DOS_REV=\"1.0.0-5-g8809108-dirty\" -DFORTRANSINGLEUNDERSCORE -DPRECISION_DOUBLE -DSIMD -DSIMD_AVX",
+    "F90"  :"mpif90 -mavx",
+    "F90F" :"-pipe -ffree-line-length-none -fno-range-check --openmp -Ofast -march=native -I/sw/pkgs/arc/stacks/gcc/10.3.0/openmpi/4.1.6/include -pthread -I/sw/pkgs/arc/stacks/gcc/10.3.0/openmpi/4.1.6/lib -L/sw/pkgs/arc/stacks/gcc/10.3.0/openmpi/4.1.6/lib -L/opt/pmix/4.2.6/lib -L/usr/lib64 -Wl,-rpath -Wl,/sw/pkgs/arc/stacks/gcc/10.3.0/openmpi/4.1.6/lib -Wl,-rpath -Wl,/opt/pmix/4.2.6/lib -Wl,-rpath -Wl,/usr/lib64 -Wl,--enable-new-dtags -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi -I/sw/pkgs/arc/stacks/gcc/10.3.0/hdf5/1.10.8/include",
+    "CF"   :"-Ofast -march=native -std=c99  -DFORTRANSINGLEUNDERSCORE -DPRECISION_DOUBLE -DSIMD -DSIMD_AVX -D__POSIX_TIMER__",
+    "cc"   :"mpicc -Wa,-q",
+    "LDF"  :" -L/sw/pkgs/arc/stacks/gcc/10.3.0/hdf5/1.10.8/lib -lhdf5hl_fortran -lhdf5_hl -lhdf5_fortran -lhdf5 -lz -lrt -ldl -lm -Wl,-rpath -Wl,/sw/pkgs/arc/stacks/gcc/10.3.0/hdf5/1.10.8/lib -I/sw/pkgs/arc/stacks/gcc/10.3.0/openmpi/4.1.6/include -pthread -I/sw/pkgs/arc/stacks/gcc/10.3.0/openmpi/4.1.6/lib -L/sw/pkgs/arc/stacks/gcc/10.3.0/openmpi/4.1.6/lib -L/opt/pmix/4.2.6/lib -L/usr/lib64 -Wl,-rpath -Wl,/sw/pkgs/arc/stacks/gcc/10.3.0/openmpi/4.1.6/lib -Wl,-rpath -Wl,/opt/pmix/4.2.6/lib -Wl,-rpath -Wl,/usr/lib64 -Wl,--enable-new-dtags -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi ",
+   }
+}
+run_info = {
+  "input_deck_crc":         3675317174.,
+  "input_deck": """
+node_conf
+{
+  node_number(1:1) =  1,
+  if_periodic(1:1) =  .false.,
+}
+
+!----------spatial grid----------
+grid
+{
+  nx_p(1:1) =  500,
+  coordinates = "cartesian",
+}
+
+!----------time step and global data dump timestep number----------
+time_step
+{
+  dt     =   0.0599,
+  ndump  =    50,
+}
+
+!----------restart information----------
+restart
+{
+  ndump_fac = 0,
+  if_restart=.false.,
+}
+
+!----------spatial limits of the simulations----------
+space
+{
+  xmin(1:1) =  0.000,
+  xmax(1:1) = 30.0,
+  if_move(1:1) = .true.,
+}
+
+!----------time limits ----------
+time
+{
+  tmin = 0.0,
+  tmax  = 2000.0,
+}
+
+!----------field solver set up----------
+el_mag_fld
+{
+  ext_fld = "none",
+  ext_b0(1:3)=0.0,
+  ext_e0(1:3)=0.0,
+}
+
+!----------boundary conditions for em-fields ----------
+emf_bound
+{
+  type(1:2,1) =   "conducting", "conducting",
+}
+
+!----------number of particle species----------
+particles
+{
+  interpolation = "linear",
+  num_species = 2,
+}
+
+!----------information for species 1----------
+species
+{
+  name = "plasma",
+  num_par_max = 1024,
+  rqm=-1.0,
+  num_par_x(1:1) = 2,
+}
+
+!----------inital proper velocities-----------------
+udist {
+  uth(1:3) = 0.0, 0.0, 0.0,
+  ufl(1:3) = 0.0, 0.0, 0.0,
+}
+
+!----------density profile for this species----------
+profile
+{
+  fx(1:4,1) = 0., 0., 1., 1., 
+   x(1:4,1) = 0., 30.0, 130.0, 2000.000, 
+}
+
+!----------boundary conditions for this species----------
+spe_bound
+{
+  type(1:2,1) =   "specular","specular",
+}
+
+!----------diagnostic for this species----------
+diag_species
+{
+   ndump_fac = 1,
+   ndump_fac_pha = 1,
+   ps_xmin = 0,
+   ps_xmax = 30, 
+   ps_nx = 100,
+   ps_pmin(1:3) = -1 , -1 , -1,
+   ps_pmax(1:3) = 1, 1, 1,
+   ps_np(1:3) = 100,100,100,
+   reports = "charge", 
+   phasespaces = "p1x1",
+}
+
+!----------information for species 2----------
+species
+{
+  name = "beam",
+  num_par_max = 1024,
+  rqm=-1.0,
+  num_par_x(1:1) = 2,
+}
+
+!----------inital proper velocities-----------------
+udist {
+  uth(1:3) = 0.0, 0.0, 0.0,
+  ufl(1:3) = 10000.0, 0.0, 0.0,
+}
+
+!----------density profile for this species----------
+profile
+{
+   density = 0.3,
+   profile_type(1:1) = "math func",
+   math_func_expr = "exp(-(x1-21)^2/2/4)",
+}
+
+!----------boundary conditions for this species----------
+spe_bound
+{
+  type(1:2,1) =   "specular","specular",
+}
+
+!----------diagnostic for this species----------
+diag_species
+{
+   ndump_fac = 1,
+   ndump_fac_pha = 1,
+   ps_xmin = 0,
+   ps_xmax = 30,     
+   ps_nx = 100,
+   ps_pmin(1:3) = 0 , -1 , -1,
+   ps_pmax(1:3) = 11000, 1, 1,
+   ps_np(1:3) = 200,100,100,
+   reports = "charge", 
+   phasespaces = "p1x1",
+}
+
+!----------smoothing for currents----------
+smooth
+{
+  type="5pass",
+}
+
+!----------diagnostic for currents----------
+diag_current
+{
+}
+
+"""
+}
